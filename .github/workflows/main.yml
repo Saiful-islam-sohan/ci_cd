@@ -14,7 +14,7 @@ env:
   DB_PORT: 3306
   DB_DATABASE: ci_cd
   DB_USERNAME: root
-  DB_PASSWORD: 
+  DB_PASSWORD: ""
 
 jobs:
   tests:
@@ -25,11 +25,11 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ROOT_PASSWORD: 
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1 
           MYSQL_DATABASE: ci_cd
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping -uroot" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout code
@@ -38,9 +38,16 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' 
-          extensions: mbstring, ctype, fileinfo, tokenizer, json, pdo_mysql 
+          php-version: '8.2'
+          extensions: mbstring, ctype, fileinfo, tokenizer, json, pdo_mysql
           coverage: none
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in `seq 1 10`;
+          do
+            mysqladmin ping -h 127.0.0.1 -uroot --silent && break || sleep 10
+          done
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
