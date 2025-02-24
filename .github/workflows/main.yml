@@ -21,8 +21,8 @@ jobs:
           extensions: mbstring, exif, pcntl, bcmath, gd, pdo_mysql
           tools: composer
 
-      - name: Copy .env
-        run: cp .env.example .env
+      # - name: Copy .env
+      #   run: cp .env.example .env
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
