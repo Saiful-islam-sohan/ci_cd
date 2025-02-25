@@ -1,3 +1,13 @@
+name: Laravel CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -8,8 +18,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: ci_cd
-          MYSQL_USER: root
-          MYSQL_PASSWORD: ""
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -37,11 +45,14 @@ jobs:
         echo "DB_HOST=127.0.0.1" >> .env
         echo "DB_PORT=3306" >> .env
         echo "DB_DATABASE=ci_cd" >> .env
-        echo "DB_USERNAME=user" >> .env
-        echo "DB_PASSWORD=password" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
 
     - name: Generate application key
       run: php artisan key:generate
+
+    - name: Wait for MySQL to be ready
+      run: sleep 20
 
     - name: Run migrations
       run: php artisan migrate --force
